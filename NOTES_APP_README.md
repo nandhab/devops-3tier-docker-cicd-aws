@@ -32,7 +32,7 @@ This is a simple 3-tier notes app using:
 4️⃣ Build and start the app:
 
 ```
-docker-compose up --build
+docker-compose up -d --build
 ```
 
 5️⃣ Open your browser at:
