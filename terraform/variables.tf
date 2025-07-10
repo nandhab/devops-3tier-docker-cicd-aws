@@ -9,6 +9,6 @@ variable "instance_type" {
 }
 
 variable "key_name" {
-  description = "devops-3tier-app"
+  description = "EC2 instance key pair"
   type        = string
 }
