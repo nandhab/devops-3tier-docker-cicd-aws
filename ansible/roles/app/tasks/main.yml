@@ -1,8 +1,9 @@
 - name: Clone application repository
   git:
-    repo: https://github.com/your-org/your-app-repo.git
+    repo: https://github.com/nandhab/devops-3tier-docker-cicd-aws.git
     dest: /home/ec2-user/app
-    version: main
+    version: week3
+    force: yes
   become: false
 
 - name: Run Docker Compose
