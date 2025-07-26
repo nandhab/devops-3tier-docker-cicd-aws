@@ -15,23 +15,6 @@
     name: docker
     executable: pip3
 
-- name: Install Docker (Amazon Linux)
-  yum:
-    name: docker
-    state: present
-
-- name: Start Docker service
-  service:
-    name: docker
-    state: started
-    enabled: yes
-
-- name: Add ec2-user to docker group
-  user:
-    name: ec2-user
-    groups: docker
-    append: yes
-
 - name: Install docker-compose Python module
   pip:
     name: docker-compose
