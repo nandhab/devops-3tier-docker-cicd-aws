@@ -1,0 +1,6 @@
+- name: EC2 Provisioning & App Deployment
+  hosts: web
+  become: true
+  roles:
+    - docker
+    - app

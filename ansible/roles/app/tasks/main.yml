@@ -1,0 +1,11 @@
+- name: Clone application repository
+  git:
+    repo: https://github.com/your-org/your-app-repo.git
+    dest: /home/ec2-user/app
+    version: main
+  become: false
+
+- name: Run Docker Compose
+  community.docker.docker_compose:
+    project_src: /home/ec2-user/app
+    restarted: true

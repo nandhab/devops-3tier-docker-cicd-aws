@@ -1,0 +1,46 @@
+- name: Update apt packages
+  apt:
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add Docker APT repo
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install Docker
+  apt:
+    name: docker-ce
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install Docker Compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: Add ec2-user to docker group
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
