@@ -124,7 +124,7 @@ ansible/
 .github/
 └── workflows/
     ├── deploy-frontend.yml
-    └── deploy-backend.yml
+    └── deploy-3tier-app.yml
 jenkins/
 └── Jenkinsfile
 ```
@@ -229,7 +229,7 @@ devops-3tier-docker-cicd-aws/
 ├── .github/                    # GitHub Actions workflows
 │   └── workflows/
 │       ├── deploy-frontend.yml
-│       └── deploy-backend.yml
+│       └── deploy-3tier-app.yml
 ├── jenkins/                    # Jenkins CI pipeline
 │   └── Jenkinsfile
 ├── monitoring/                 # Prometheus and Grafana setup
