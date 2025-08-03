@@ -36,8 +36,6 @@ jobs:
           username: ${{ vars.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            docker stop frontend || true
-            docker rm frontend || true
-            docker pull myrepo/frontend:latest
-            docker run -d --name frontend -p 3000:3000 myrepo/frontend:latest
+            docker-compose stop frontend || true
+            docker-compose up frontend -d --build
 
