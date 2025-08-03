@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Notes App</title>
+  <title>My Notes v2</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -20,7 +20,7 @@
     }
 
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 40px auto;
       background: #ffffff;
       padding: 20px;
@@ -28,31 +28,37 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
-    .add-note {
+    .toolbar {
       display: flex;
+      flex-direction: column;
+      gap: 16px;
       margin-bottom: 30px;
     }
 
-    .add-note input {
-      flex: 1;
+    .toolbar input,
+    .toolbar textarea {
       padding: 12px;
       font-size: 1rem;
       border: 1px solid #ddd;
-      border-radius: 6px 0 0 6px;
+      border-radius: 6px;
       outline: none;
     }
 
-    .add-note button {
-      padding: 12px 20px;
+    .toolbar .tag-input {
+      width: 100%;
+    }
+
+    .toolbar button {
+      padding: 12px;
       border: none;
       background: #4f46e5;
       color: white;
       font-weight: bold;
-      border-radius: 0 6px 6px 0;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    .add-note button:hover {
+    .toolbar button:hover {
       background: #4338ca;
     }
 
@@ -64,99 +70,108 @@
 
     .note-card {
       background: #fff;
-      padding: 16px 20px;
+      padding: 16px;
       border: 1px solid #e5e5e5;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.03);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: box-shadow 0.2s;
-    }
-
-    .note-card:hover {
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      flex-direction: column;
+      gap: 8px;
     }
 
     .note-content {
-      flex: 1;
-      margin-right: 20px;
+      min-height: 50px;
+      padding: 6px;
+      border: 1px dashed transparent;
     }
 
     .note-content[contenteditable="true"] {
-      padding: 6px;
-      border: 1px dashed #ccc;
+      border-color: #ccc;
       border-radius: 4px;
     }
 
+    .note-tags {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .note-time {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .note-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
     .note-actions button {
-      margin-left: 8px;
       padding: 6px 12px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
 
-    .edit-btn {
-      background: #10b981;
-      color: white;
-    }
+    .edit-btn { background: #10b981; color: white; }
+    .edit-btn:hover { background: #059669; }
 
-    .edit-btn:hover {
-      background: #059669;
-    }
+    .delete-btn { background: #ef4444; color: white; }
+    .delete-btn:hover { background: #dc2626; }
 
-    .delete-btn {
-      background: #ef4444;
-      color: white;
-    }
-
-    .delete-btn:hover {
-      background: #dc2626;
-    }
-
-    @media (max-width: 600px) {
-      .add-note {
-        flex-direction: column;
-      }
-
-      .add-note input,
-      .add-note button {
-        border-radius: 6px;
-        width: 100%;
-        margin-bottom: 8px;
-      }
+    .search-bar {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <header>My Notes</header>
+  <header>My Notes v2</header>
   <div class="container">
-    <form class="add-note" id="addForm">
-      <input type="text" id="content" placeholder="Write your notesss here..." required>
-      <button type="submit">Add Note</button>
-    </form>
+    <div class="toolbar">
+      <input type="text" id="search" class="search-bar" placeholder="Search notes...">
+      <textarea id="content" rows="3" placeholder="Write your note..." required></textarea>
+      <input type="text" id="tags" class="tag-input" placeholder="Tags (comma-separated)">
+      <button onclick="addNote()">Add Note</button>
+    </div>
     <div class="notes" id="notes"></div>
   </div>
 
   <script>
-    const apiUrl = "/notes"
+    const apiUrl = "/notes";
 
+    let allNotes = [];
 
     async function loadNotes() {
       const res = await fetch(apiUrl);
-      const notes = await res.json();
+      allNotes = await res.json();
+      renderNotes(allNotes);
+    }
+
+    function renderNotes(notes) {
       const container = document.getElementById('notes');
       container.innerHTML = '';
       notes.forEach(note => {
         const card = document.createElement('div');
         card.className = 'note-card';
+        card.setAttribute('data-id', note.id);
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'note-content';
-        contentDiv.textContent = note.content;
-        contentDiv.setAttribute('data-id', note.id);
+        contentDiv.innerHTML = note.content;
         contentDiv.setAttribute('contenteditable', 'false');
+
+        const tagsDiv = document.createElement('div');
+        tagsDiv.className = 'note-tags';
+        tagsDiv.textContent = `# ${note.tags?.join(', ') || ''}`;
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'note-time';
+        const created = new Date(note.createdAt || Date.now()).toLocaleString();
+        timeDiv.textContent = `Created at: ${created}`;
 
         const actions = document.createElement('div');
         actions.className = 'note-actions';
@@ -173,11 +188,11 @@
             editBtn.textContent = "Save";
             editing = true;
           } else {
-            const newContent = contentDiv.textContent.trim();
+            const newContent = contentDiv.innerHTML.trim();
             await fetch(`${apiUrl}/${note.id}`, {
               method: 'PUT',
               headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({content: newContent})
+              body: JSON.stringify({...note, content: newContent})
             });
             contentDiv.contentEditable = "false";
             editBtn.textContent = "Edit";
@@ -194,31 +209,44 @@
         actions.appendChild(delBtn);
 
         card.appendChild(contentDiv);
+        card.appendChild(tagsDiv);
+        card.appendChild(timeDiv);
         card.appendChild(actions);
 
         container.appendChild(card);
       });
     }
 
-    async function addNote(e) {
-      e.preventDefault();
+    async function addNote() {
       const content = document.getElementById('content').value.trim();
+      const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean);
       if (!content) return;
+
       await fetch(apiUrl, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({content})
+        body: JSON.stringify({ content, tags, createdAt: new Date().toISOString() })
       });
+
       document.getElementById('content').value = '';
+      document.getElementById('tags').value = '';
       loadNotes();
     }
 
     async function deleteNote(id) {
-      await fetch(`${apiUrl}/${id}`, {method: 'DELETE'});
+      await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
       loadNotes();
     }
 
-    document.getElementById('addForm').addEventListener('submit', addNote);
+    document.getElementById('search').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allNotes.filter(note =>
+        note.content.toLowerCase().includes(query) ||
+        (note.tags || []).some(tag => tag.toLowerCase().includes(query))
+      );
+      renderNotes(filtered);
+    });
+
     loadNotes();
   </script>
 </body>
