@@ -36,8 +36,6 @@ jobs:
           username: ${{ vars.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            docker stop backend || true
-            docker rm backend || true
-            docker pull myrepo/backend:latest
-            docker run -d --name backend -p 4000:4000 myrepo/backend:latest
+            docker-compose stop backend || true
+            docker-compose up backend -d --build
 
