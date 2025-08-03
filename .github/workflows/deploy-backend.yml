@@ -52,4 +52,4 @@ jobs:
             docker rm backend || true
 
             echo "Building and running backend container..."
-            docker-compose up -d backend
+            docker-compose up -d
