@@ -1,0 +1,34 @@
+- name: Ensure Python 3 and pip are installed
+  yum:
+    name:
+      - python3
+      - python3-pip
+    state: present
+
+- name: Install Docker SDK (safe version for system-installed requests)
+  pip:
+    name: docker==5.0.3
+    executable: pip3
+
+- name: Install Docker SDK for Python
+  pip:
+    name: docker
+    executable: pip3
+
+- name: Install docker-compose Python module
+  pip:
+    name: docker-compose
+    executable: pip3
+
+- name: Clone application repository
+  git:
+    repo: https://github.com/nandhab/devops-3tier-docker-cicd-aws.git
+    dest: /home/ec2-user/app
+    version: week3
+    force: yes
+  become: false
+
+- name: Run Docker Compose
+  community.docker.docker_compose:
+    project_src: /home/ec2-user/app
+    restarted: true

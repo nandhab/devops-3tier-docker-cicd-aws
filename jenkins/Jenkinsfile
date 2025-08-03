@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "backend:latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'week4', url: 'https://github.com/nandhab/devops-3tier-docker-cicd-aws.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE ./backend'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'echo "Run backend tests here"'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['EC2_SSH_CREDENTIAL_ID']) {
+                    sh '''
+                      ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << EOF
+                      docker stop backend || true
+                      docker rm backend || true
+                      docker run -d --name backend -p 4000:4000 $DOCKER_IMAGE
+                      EOF
+                    '''
+                }
+            }
+        }
+    }
+}
+
