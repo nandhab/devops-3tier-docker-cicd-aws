@@ -11,11 +11,13 @@ on:
       environment:
         description: 'Environment to deploy'
         required: true
-        default: 'staging'
+        default: 'aws'
+
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
 
     steps:
       - name: Checkout Code
