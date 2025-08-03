@@ -12,6 +12,8 @@ on:
         description: 'Target environment (e.g., aws)'
         required: true
         default: 'aws'
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
 
 jobs:
   deploy:
@@ -19,28 +21,27 @@ jobs:
     environment: ${{ inputs.environment || 'aws' }}
 
     steps:
-      - name: Deploy Backend to EC2
+      - name: Deploy backend to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          envs: BRANCH_NAME  # 🚀 inject branch into SSH session
           script: |
             set -e
 
-            BRANCH="${GITHUB_REF##*/}"
+            echo "Deploying branch: $BRANCH_NAME"
+
             REPO="https://github.com/nandhab/devops-3tier-docker-cicd-aws.git"
             DIR="devops-3tier-docker-cicd-aws"
 
-            echo "Deploying branch: $BRANCH"
-
-            # Clone or update the repo
             if [ ! -d "$DIR" ]; then
-              git clone -b "$BRANCH" "$REPO"
+              git clone -b "$BRANCH_NAME" "$REPO"
             else
               cd "$DIR"
               git fetch origin
-              git reset --hard origin/"$BRANCH"
+              git reset --hard origin/"$BRANCH_NAME"
               cd ..
             fi
 
