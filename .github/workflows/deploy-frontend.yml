@@ -5,7 +5,13 @@ on:
     paths:
       - 'frontend/**'
     branches:
-      - main
+      - week4
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
 
 jobs:
   build-deploy:
