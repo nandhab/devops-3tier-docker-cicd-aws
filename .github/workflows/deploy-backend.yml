@@ -3,9 +3,9 @@ name: Deploy Backend
 on:
   push:
     branches:
-      - '**'        # Trigger on any branch
+      - '**'         # All branches
     paths:
-      - 'backend/**'
+      - '**'         # All files and folders
   workflow_dispatch:
     inputs:
       environment:
