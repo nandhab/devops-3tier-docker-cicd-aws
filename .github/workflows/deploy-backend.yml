@@ -2,49 +2,53 @@ name: Deploy Backend
 
 on:
   push:
+    branches:
+      - '**'        # Trigger on any branch
     paths:
       - 'backend/**'
-    branches:
-      - week4
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: 'Target environment (e.g., aws)'
         required: true
         default: 'aws'
 
-
 jobs:
-  build-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment || 'aws' }}
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Debug Secrets
-        run: |
-          echo "EC2_HOST is: ${{ secrets.EC2_HOST }}"
-          echo "EC2_USER is: ${{ secrets.EC2_USER }}"
-          echo "EC2_KEY is: ${{ secrets.EC2_KEY }}"
-        shell: bash
-
-#      - name: Build Docker Image
-#        run: |
-#          docker build -t backend:latest ./backend
-
-      - name: Run Unit Tests (Optional)
-        run: |
-          echo "Run your backend tests here"
-
-      - name: Deploy to EC2
+      - name: Deploy Backend to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            docker-compose stop backend || true
-            docker-compose up backend -d --build
+            set -e
 
+            BRANCH="${GITHUB_REF##*/}"
+            REPO="https://github.com/nandhab/devops-3tier-docker-cicd-aws.git"
+            DIR="devops-3tier-docker-cicd-aws"
+
+            echo "Deploying branch: $BRANCH"
+
+            # Clone or update the repo
+            if [ ! -d "$DIR" ]; then
+              git clone -b "$BRANCH" "$REPO"
+            else
+              cd "$DIR"
+              git fetch origin
+              git reset --hard origin/"$BRANCH"
+              cd ..
+            fi
+
+            cd "$DIR"
+
+            echo "Stopping any existing backend container..."
+            docker stop backend || true
+            docker rm backend || true
+
+            echo "Building and running backend container..."
+            docker-compose up -d backend
