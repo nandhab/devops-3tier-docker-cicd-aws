@@ -1,0 +1,87 @@
+{
+  "annotations": {"list": [{"builtIn": 1, "type": "dashboard"}]},
+  "editable": true,
+  "id": null,
+  "panels": [
+    {
+      "type": "gauge",
+      "title": "CPU Utilization (%)",
+      "id": 10,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - (sum by (instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) / sum by (instance)(rate(node_cpu_seconds_total[5m]))))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "gauge",
+      "title": "Memory Used (%)",
+      "id": 11,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "gauge",
+      "title": "Disk Used (%) - root fs",
+      "id": 12,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - (sum by (instance)(node_filesystem_avail_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay|aufs\"}) / sum by (instance)(node_filesystem_size_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay|aufs\"})))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Utilization (5m rate)",
+      "id": 13,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - (sum by (instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) / sum by (instance)(rate(node_cpu_seconds_total[5m]))))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8}
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["host", "node-exporter"],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "instance",
+        "datasource": {"type": "prometheus", "uid": "prom"},
+        "query": "label_values(node_exporter_build_info, instance)",
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "Host Overview (Node Exporter)",
+  "uid": "host-overview",
+  "version": 1
+}

@@ -20,6 +20,14 @@ ingress {
 }
 
 ingress {
+  description = "Port 3000"
+  from_port   = 3000
+  to_port     = 13000
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+ingress {
   description = "Port 8000"
   from_port   = 8000
   to_port     = 8000
