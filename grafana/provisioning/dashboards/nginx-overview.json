@@ -1,0 +1,107 @@
+{
+  "uid": "nginx-overview",
+  "title": "NGINX Overview (stub_status)",
+  "tags": ["nginx", "exporter"],
+  "timezone": "",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Exporter Up",
+      "id": 1,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "up{instance=~\"$instance\"}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bool"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Active Connections",
+      "id": 2,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "nginx_connections_active{instance=~\"$instance\"}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 4, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Reading",
+      "id": 3,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "nginx_connections_reading{instance=~\"$instance\"}"}
+      ],
+      "gridPos": {"x": 10, "y": 0, "w": 4, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Writing",
+      "id": 4,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "nginx_connections_writing{instance=~\"$instance\"}"}
+      ],
+      "gridPos": {"x": 14, "y": 0, "w": 4, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Waiting",
+      "id": 5,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "nginx_connections_waiting{instance=~\"$instance\"}"}
+      ],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests / second",
+      "id": 6,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(nginx_http_requests_total{instance=~\"$instance\"}[5m])"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "req/s"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8}
+    },
+    {
+      "type": "gauge",
+      "title": "Dropped Connections (%)",
+      "id": 7,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - (rate(nginx_connections_handled{instance=~\"$instance\"}[5m]) / rate(nginx_connections_accepted{instance=~\"$instance\"}[5m])))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8}
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "instance",
+        "datasource": {"type": "prometheus", "uid": "prom"},
+        "includeAll": false,
+        "multi": false,
+        "query": "label_values(nginx_connections_active, instance)"
+      }
+    ]
+  }
+}

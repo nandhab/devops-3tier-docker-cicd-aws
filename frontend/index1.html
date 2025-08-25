@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Notes App</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 20px;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .add-note {
+      display: flex;
+      margin-bottom: 30px;
+    }
+
+    .add-note input {
+      flex: 1;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px 0 0 6px;
+      outline: none;
+    }
+
+    .add-note button {
+      padding: 12px 20px;
+      border: none;
+      background: #4f46e5;
+      color: white;
+      font-weight: bold;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+    }
+
+    .add-note button:hover {
+      background: #4338ca;
+    }
+
+    .notes {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .note-card {
+      background: #fff;
+      padding: 16px 20px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: box-shadow 0.2s;
+    }
+
+    .note-card:hover {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .note-content {
+      flex: 1;
+      margin-right: 20px;
+    }
+
+    .note-content[contenteditable="true"] {
+      padding: 6px;
+      border: 1px dashed #ccc;
+      border-radius: 4px;
+    }
+
+    .note-actions button {
+      margin-left: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background: #10b981;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background: #059669;
+    }
+
+    .delete-btn {
+      background: #ef4444;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background: #dc2626;
+    }
+
+    @media (max-width: 600px) {
+      .add-note {
+        flex-direction: column;
+      }
+
+      .add-note input,
+      .add-note button {
+        border-radius: 6px;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>My Notes</header>
+  <div class="container">
+    <form class="add-note" id="addForm">
+      <input type="text" id="content" placeholder="Write your notesss here..." required>
+      <button type="submit">Add Note</button>
+    </form>
+    <div class="notes" id="notes"></div>
+  </div>
+
+  <script>
+    const apiUrl = "/notes"
+
+
+    async function loadNotes() {
+      const res = await fetch(apiUrl);
+      const notes = await res.json();
+      const container = document.getElementById('notes');
+      container.innerHTML = '';
+      notes.forEach(note => {
+        const card = document.createElement('div');
+        card.className = 'note-card';
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'note-content';
+        contentDiv.textContent = note.content;
+        contentDiv.setAttribute('data-id', note.id);
+        contentDiv.setAttribute('contenteditable', 'false');
+
+        const actions = document.createElement('div');
+        actions.className = 'note-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.textContent = 'Edit';
+        let editing = false;
+
+        editBtn.onclick = async () => {
+          if (!editing) {
+            contentDiv.contentEditable = "true";
+            contentDiv.focus();
+            editBtn.textContent = "Save";
+            editing = true;
+          } else {
+            const newContent = contentDiv.textContent.trim();
+            await fetch(`${apiUrl}/${note.id}`, {
+              method: 'PUT',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({content: newContent})
+            });
+            contentDiv.contentEditable = "false";
+            editBtn.textContent = "Edit";
+            editing = false;
+          }
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = () => deleteNote(note.id);
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        card.appendChild(contentDiv);
+        card.appendChild(actions);
+
+        container.appendChild(card);
+      });
+    }
+
+    async function addNote(e) {
+      e.preventDefault();
+      const content = document.getElementById('content').value.trim();
+      if (!content) return;
+      await fetch(apiUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({content})
+      });
+      document.getElementById('content').value = '';
+      loadNotes();
+    }
+
+    async function deleteNote(id) {
+      await fetch(`${apiUrl}/${id}`, {method: 'DELETE'});
+      loadNotes();
+    }
+
+    document.getElementById('addForm').addEventListener('submit', addNote);
+    loadNotes();
+  </script>
+</body>
+</html>

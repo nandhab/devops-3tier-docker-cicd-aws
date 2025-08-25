@@ -24,7 +24,7 @@
   git:
     repo: https://github.com/nandhab/devops-3tier-docker-cicd-aws.git
     dest: /home/ec2-user/app
-    version: week3
+    version: week5
     force: yes
   become: false
 

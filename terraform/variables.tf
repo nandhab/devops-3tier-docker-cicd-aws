@@ -12,3 +12,7 @@ variable "key_name" {
   description = "EC2 instance key pair"
   type        = string
 }
+
+variable "aws_profile" {
+  default     = "3tierdemo"
+}

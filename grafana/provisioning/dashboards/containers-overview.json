@@ -1,0 +1,100 @@
+{
+  "uid": "containers-overview",
+  "title": "Containers Overview (cAdvisor)",
+  "tags": ["cadvisor", "docker"],
+  "timezone": "",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "gauge",
+      "title": "CPU Utilization (%)",
+      "id": 10,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * sum by (name)(rate(container_cpu_usage_seconds_total{image!=\"\",name=~\"$container\"}[5m])) / on(instance) group_left sum by (instance)(machine_cpu_cores)"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "gauge",
+      "title": "Memory Working Set (GiB)",
+      "id": 11,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (name)(container_memory_working_set_bytes{name=~\"$container\",image!=\"\"}) / 1024^3"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "gbytes"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "gauge",
+      "title": "Filesystem Used (GiB)",
+      "id": 12,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (name)(container_fs_usage_bytes{name=~\"$container\",image!=\"\"}) / 1024^3"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "gbytes"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}},
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Network RX (bytes/s)",
+      "id": 13,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (name)(rate(container_network_receive_bytes_total{name=~\"$container\",image!=\"\"}[5m]))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Network TX (bytes/s)",
+      "id": 14,
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (name)(rate(container_network_transmit_bytes_total{name=~\"$container\",image!=\"\"}[5m]))"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "container",
+        "datasource": {"type": "prometheus", "uid": "prom"},
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "query": "label_values(container_memory_working_set_bytes{image!=\"\"}, name)",
+        "current": {"selected": true, "text": ["All"], "value": ".*"}
+      }
+    ]
+  }
+}
